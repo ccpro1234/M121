@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SA — Baccarat Studio (Pro-MAX AI)</title>
+
+<style>
+:root{
+--bg:#0b0b0d;
+--panel:#0f1113;
+--gold:#ffd24d;
+--p:#33b5ff;
+--b:#ff6b6b;
+--ok:#00ff88;
+--bad:#ff0033;
+--text:#e6eef6;
+--muted:#9aa7b2;
+}
+*{box-sizing:border-box;font-family:Consolas,Segoe UI,monospace}
+body{margin:0;background:var(--bg);color:var(--text)}
+
+.top{
+background:linear-gradient(#111,#000);
+padding:10px 14px;
+display:flex;
+align-items:center;
+gap:14px;
+}
+.title{color:var(--gold);font-size:20px;font-weight:bold}
+.info{color:var(--gold);font-size:14px}
+.zone{font-weight:bold}
+.spacer{flex:1}
+
+.controls{padding:10px;display:flex;gap:8px}
+button{
+border:none;padding:10px 18px;
+font-size:15px;font-weight:bold;cursor:pointer
+}
+.player{background:var(--p);color:#02131a}
+.banker{background:var(--b);color:#200906}
+.dark{background:#1a1a1a;color:#fff;border:1px solid #333}
+
+.main{
+display:grid;
+grid-template-columns:1fr 420px;
+gap:10px;padding:10px
+}
+.panel{background:var(--panel);padding:10px}
+
+.lane{
+display:grid;
+grid-template-columns:90px 1fr 120px;
+gap:6px;padding:4px 0;font-size:14px
+}
+.lane strong{font-weight:bold}
+
+.lane.gold{background:#3a2a0b;color:var(--gold)}
+.lane.good{background:#0b3a1a;color:#7cffb2}
+.lane.bad{background:#3a0b0b;color:#ff6b6b}
+
+canvas{background:#050607;width:100%;height:260px}
+
+.legend{font-size:13px;margin-top:8px}
+.legend div{margin:2px 0}
+
+.alert{
+margin-top:8px;
+padding:6px;
+font-size:13px;
+font-weight:bold;
+display:none
+}
+.alert.danger{background:#ff6b6b;color:#111}
+.alert.safe{background:#7cffb2;color:#111}
+
+.footer{
+text-align:center;font-size:11px;
+color:var(--muted);padding:6px
+}/* ===== LOGIN ===== */
+.login-box{
+ position:fixed;
+ inset:0;
+ background:#000;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ z-index:9999;
+}
+.login{
+ background:#111;
+ border:1px solid #333;
+ padding:20px;
+ width:260px;
+ text-align:center;
+}
+.login h2{
+ margin:0 0 10px;
+ color:var(--gold);
+}
+.login input{
+ width:100%;
+ margin:6px 0;
+ padding:8px;
+ background:#000;
+ color:#fff;
+ border:1px solid #333;
+}
+.login button{
+ width:100%;
+ margin-top:8px;
+ padding:8px;
+ background:var(--gold);
+ border:none;
+ font-weight:bold;
+ cursor:pointer;
+}
+.login .err{
+ color:#ff6b6b;
+ font-size:12px;
+ margin-top:6px;
+ display:none;
+}
+/* ===== PREMIUM BOX — สดใส Neon ===== */
+.premium-box{
+  margin-top:18px;
+  padding:22px;
+  border-radius:22px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  border:2px solid rgba(0,255,255,.6);
+  box-shadow:
+    0 0 20px rgba(0,255,255,.6),
+    0 0 40px rgba(0,255,255,.4),
+    inset 0 0 15px rgba(0,255,255,.2);
+  animation:premiumGlow 2.5s infinite alternate;
+}
+
+@keyframes premiumGlow{
+  from{box-shadow:0 0 15px rgba(0,255,255,.5);}
+  to{box-shadow:0 0 40px rgba(0,255,255,.9);}
+}
+
+.premium-title{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:10px;
+  text-align:center;
+  letter-spacing:1px;
+  color:#00ffff;
+  text-shadow:0 0 10px #00ffff;
+}
+
+.premium-lanes{
+  font-size:14px;
+  margin:8px 0;
+  text-align:center;
+  color:#e6ffff;
+}
+
+.premium-p{
+  display:inline-block;
+  padding:10px 24px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#33b5ff,#0066ff);
+  color:#fff;
+  font-weight:bold;
+  margin:6px;
+  font-size:18px;
+  box-shadow:0 0 18px rgba(0,150,255,.9);
+  animation:blinkP 1.2s infinite;
+}
+
+@keyframes blinkP{
+  50%{transform:scale(1.15);}
+}
+
+.premium-b{
+  display:inline-block;
+  padding:10px 24px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#ff6b6b,#c40000);
+  color:#fff;
+  font-weight:bold;
+  margin:6px;
+  font-size:18px;
+  box-shadow:0 0 18px rgba(255,0,0,.9);
+  animation:blinkB 1.2s infinite;
+}
+
+@keyframes blinkB{
+  50%{transform:scale(1.15);}
+}
+
+/* ===== DEEP ASSIST BOX — ม่วงพลัง AI ===== */
+#deepAssistBox{
+  margin-top:18px;
+  padding:22px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#240046,#3c096c,#5a189a);
+  border:2px solid rgba(200,0,255,.7);
+  box-shadow:
+    0 0 20px rgba(200,0,255,.6),
+    0 0 50px rgba(200,0,255,.4),
+    inset 0 0 15px rgba(255,0,255,.2);
+  animation:deepGlow 2.5s infinite alternate;
+}
+
+@keyframes deepGlow{
+  from{box-shadow:0 0 20px rgba(200,0,255,.6);}
+  to{box-shadow:0 0 45px rgba(255,0,255,.9);}
+}
+
+#deepAssistResult{
+  font-size:20px;
+  font-weight:bold;
+  text-align:center;
+  margin-top:12px;
+}
+
+#deepAssistScore{
+  text-align:center;
+  margin-top:8px;
+  font-size:13px;
+  color:#ffd6ff;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login-box" id="loginBox">
+  <div class="login">
+    <h2>LOGIN</h2>
+    <input id="user" placeholder="User">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">LOGIN</button>
+    <div class="err" id="err">User หรือ Password ผิด</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+<div class="top">
+  <div class="title">SA — Baccarat Studio (Pro-MAX AI)</div>
+  <div class="info" id="best">Best Lane: - | %- | Predict=- | Conf=-</div>
+  <div class="info zone" id="zone">Zone: NORMAL</div>
+  <div class="spacer"></div>
+  <div class="info" id="count">P=0 | B=0 | Total=0</div>
+</div>
+
+<div class="controls">
+  <button class="player" onclick="add('P')">PLAYER</button>
+  <button class="banker" onclick="add('B')">BANKER</button>
+  <button class="dark" onclick="undo()">UNDO</button>
+  <button class="dark" onclick="clearAll()">CLEAR</button>
+</div>
+
+<div class="main">
+  <div class="panel" id="lanes"></div>
+
+  <div class="panel">
+
+    <canvas id="road" width="360" height="260"></canvas>
+
+    <div class="legend">...</div>
+
+    <div class="alert danger" id="alertDanger"></div>
+    <div class="alert safe" id="alertSafe"></div>
+
+    <div class="legend" id="master">Master Vote: -</div>
+
+    <!-- 🔥 Premium AI (เหลืออันเดียว) -->
+    <div class="premium-box" id="premiumBox" style="display:none">
+      <div class="premium-title">🔥 Premium AI — สายผิดน้อยสุด</div>
+      <div id="premiumName">รอข้อมูล...</div>
+      <div id="premiumLanes" class="premium-lanes"></div>
+      <div id="premiumPredict" style="margin-top:10px;text-align:center"></div>
+    </div>
+
+    <!-- 🤖 Deep Assist (เหลืออันเดียว) -->
+    <div class="premium-box" id="deepAssistBox" style="display:none">
+      <div class="premium-title"> ผู้ช่วย หาตัวแทง เฉพาะตอน กล่องสายผิดน้อย สีคละกัน — วิเคราะห์หลายชั้น</div>
+      <div id="deepAssistResult">-</div>
+      <div id="deepAssistScore"></div>
+    </div>
+
+  </div>
+</div>
+
+    
+
+
+
+<div class="footer">
+  Version 1 |
+  หมดอายุ: 15 มีนาคม พ.ศ. 2569
+</div>
+
+
+<script>
+
+const EXPIRE_DATE = new Date('2026-03-15T23:59:59');
+
+(function checkExpire(){
+  const now = new Date();
+  if(now > EXPIRE_DATE){
+    document.body.innerHTML = `
+      <div style="
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        background:#000;
+        color:#ffd24d;
+        font-size:22px;
+        font-family:Consolas;
+        text-align:center;
+      ">
+        โปรแกรมหมดอายุแล้ว<br>
+        หมดอายุวันที่ 15 มีนาคม พ.ศ. 2569
+      </div>
+    `;
+    throw new Error("EXPIRED");
+  }
+})();
+
+function login(){
+ const u=document.getElementById('user').value;
+ const p=document.getElementById('pass').value;
+ if(u==="1234" && p==="1234"){
+   document.getElementById('loginBox').style.display="none";
+   document.getElementById('app').style.display="block";
+ }else{
+   document.getElementById('err').style.display="block";
+ }
+}
+const ROWS=6,COLS=30;
+const history=[];
+const lanes=[...Array(15)].map(()=>({items:[],pred:null}));
+
+
+
+
+/* === FORMULAS f1–f15 (ตรง Python) === */
+const F=[
+h=>h.at(-1),
+h=>h.at(-1)==='P'?'B':'P',
+h=>h.filter(x=>x==='P').length>h.filter(x=>x==='B').length?'P':'B',
+h=>h.length%2===0?'P':'B',
+h=>h.length>1?h.at(-1):null,
+h=>h.length>1?(h.at(-1)==='P'?'B':'P'):null,
+h=>Math.random()>.5?'P':'B',
+h=>h.length<4?null:(h.slice(-4).filter(x=>x==='P').length>2?'P':'B'),
+h=>h.length<6?null:(h.slice(-3).filter(x=>x==='P').length>1?'P':'B'),
+h=>h.length<5?null:(h.slice(-5).filter(x=>x==='P').length>2?'B':'P'),
+h=>h.length<3?null:h.at(-3),
+h=>h.length<4?null:(h.at(-1)===h.at(-3)?'P':'B'),
+h=>{
+ if(h.length<6)return null;
+ let s=1;
+ for(let i=h.length-1;i>0;i--){if(h[i]===h[i-1])s++;else break}
+ return s>=3?h.at(-1):(h.at(-1)==='P'?'B':'P');
+},
+h=>h.length<4?null:(h.at(-2)===h.at(-1)?(h.at(-1)==='P'?'B':'P'):h.at(-1)),
+h=>{
+ if(h.length<8)return null;
+ let a=h.slice(-8);
+ let d=a.filter(x=>x==='P').length-a.filter(x=>x==='B').length;
+ return d>=2?'P':d<=-2?'B':Math.random()>.5?'P':'B'
+}
+];
+
+/* === DETECTORS === */
+function detectDragon(){
+ if(history.length<4)return null;
+ let s=1;
+ for(let i=history.length-1;i>0;i--){if(history[i]===history[i-1])s++;else break}
+ return s>=4?history.at(-1):null;
+}
+function detectPingpong(){
+ if(history.length<4)return false;
+ let a=history.slice(-4);
+ return a[0]===a[2] && a[1]===a[3] && a[0]!==a[1];
+}
+
+/* === ACTIONS === */
+function add(v){
+ lanes.forEach((l,i)=>l.pred=F[i](history));
+ history.push(v);
+ lanes.forEach(l=>{
+  if(l.pred)l.items.push(l.pred===v?'/':'X');
+ });
+ render();
+}
+function undo(){
+ if(!history.length)return;
+ history.pop();
+ lanes.forEach(l=>l.items.pop());
+ render();
+}
+function clearAll(){
+ history.length=0;
+ lanes.forEach(l=>l.items=[]);
+ render();
+}
+
+/* === RENDER === */
+function render(){
+ document.getElementById('count').textContent=
+  `P=${history.filter(x=>x==='P').length} | B=${history.filter(x=>x==='B').length} | Total=${history.length}`;
+
+ let html='';
+ let best={i:0,conf:0};
+ lanes.forEach((l,i)=>{
+  let w=l.items.filter(x=>x==='/').length;
+  let t=l.items.length||1;
+  let pct=(w/t*100);
+  let cls='';
+  if(pct>=75)cls='gold';
+  else if(pct>=60)cls='good';
+  else if(pct<=35)cls='bad';
+  if(pct>best.conf){best={i,conf:pct}}
+  html+=`
+  <div class="lane ${cls}">
+    <strong>Lane ${i+1}</strong>
+    <span>[${l.pred||'-'}] ${l.items.join(' ')}</span>
+    <strong>${pct.toFixed(1)}%</strong>
+  </div>`;
+ });
+ document.getElementById('lanes').innerHTML=html;
+
+ document.getElementById('best').textContent=
+ `Best Lane: ${best.i+1} | %${best.conf.toFixed(1)} | Predict=${lanes[best.i].pred||'-'} | Conf=${best.conf.toFixed(1)}`;
+
+ /* ALERTS */
+ let d=detectDragon();
+ let p=detectPingpong();
+ let ad=document.getElementById('alertDanger');
+ let as=document.getElementById('alertSafe');
+ ad.style.display=as.style.display='none';
+
+ if(d){
+  ad.textContent=`มังกร ${d} ยาว — ระวังแทงสวน`;
+  ad.style.display='block';
+  document.getElementById('zone').textContent='Zone: DANGER';
+ }
+ else if(p){
+  ad.textContent='เข้าปิงปอง — ระวังเด้ง/ตัด';
+  ad.style.display='block';
+  document.getElementById('zone').textContent='Zone: DANGER';
+ }
+ else{
+  as.textContent='สถานะปกติ';
+  as.style.display='block';
+  document.getElementById('zone').textContent='Zone: NORMAL';
+ }
+
+ document.getElementById('master').textContent=
+ `Master Vote: Lane ${best.i+1} | score=${best.conf.toFixed(1)}`;
+
+/* ===== PREMIUM AI PRO (STRICT SAFE MODE) ===== */
+
+let winners = [];
+const premiumBox = document.getElementById('premiumBox');
+
+// 1️⃣ ต้องมีอย่างน้อย 3 ตาก่อน
+if(history.length < 3){
+  premiumBox.style.display = "none";
+}
+else{
+
+  let premiumData = lanes.map((l,i)=>{
+
+    let hist = l.items;
+    let maxLose = 0;
+    let streak = 0;
+
+    hist.forEach(x=>{
+      if(x==='X'){
+        streak++;
+        if(streak > maxLose) maxLose = streak;
+      }else{
+        streak = 0;
+      }
+    });
+
+    return {
+      lane:i,
+      maxLose:maxLose,
+      predict:l.pred,
+      total:l.items.length
+    };
+  });
+
+  // 2️⃣ ต้องมี lane ที่มีผลลัพธ์จริง
+  let usable = premiumData.filter(x=>x.predict && x.total > 0);
+
+  if(usable.length === 0){
+    premiumBox.style.display = "none";
+  }
+  else{
+
+    premiumBox.style.display = "block";
+
+    let minLose = Math.min(...usable.map(x=>x.maxLose));
+    winners = usable.filter(x=>x.maxLose === minLose);
+
+    document.getElementById('premiumName').innerText =
+      "สายที่เคยผิดติดกันน้อยสุด = " + minLose + " ครั้ง";
+
+    document.getElementById('premiumLanes').innerText =
+      "ควรเล่น: " + winners.map(x=>"Lane "+(x.lane+1)).join(", ");
+
+    let html = winners.map(x=>{
+      if(x.predict==='P') return `<span class="premium-p">P</span>`;
+      if(x.predict==='B') return `<span class="premium-b">B</span>`;
+      return "";
+    }).join("");
+
+    document.getElementById('premiumPredict').innerHTML = html;
+  }
+}
+
+/* ===== DEEP ASSIST ENGINE (SHOW ONLY WHEN MIXED P/B) ===== */
+
+const deepBox = document.getElementById("deepAssistBox");
+
+let pGroup = winners.filter(x=>x.predict==='P');
+let bGroup = winners.filter(x=>x.predict==='B');
+
+// 👇 เงื่อนไขใหม่: ต้องมีทั้ง P และ B
+if(pGroup.length > 0 && bGroup.length > 0){
+
+  deepBox.style.display = "block";
+
+  function scoreSide(group, side){
+
+    let score = 0;
+
+    // ชั้น 1: จำนวน lane
+    score += group.length * 2;
+
+    // ชั้น 2: WinRate เฉลี่ย
+    let avgWin = group.reduce((sum,x)=>{
+      let laneObj = lanes[x.lane];
+      let wins = laneObj.items.filter(v=>v==='/').length;
+      let total = laneObj.items.length||1;
+      return sum + (wins/total);
+    },0) / group.length;
+
+    score += avgWin * 3;
+
+    // ชั้น 3: เสถียรภาพ
+    let stability = group.reduce((s,x)=>s+(5-x.maxLose),0)/group.length;
+    score += stability * 4;
+
+    // ชั้น 4: Momentum 5 ตาหลัง
+    let recent = history.slice(-5);
+    let momentum = recent.filter(v=>v===side).length / (recent.length||1);
+    score += momentum * 3;
+
+    return score;
+  }
+
+  let scoreP = scoreSide(pGroup,'P');
+  let scoreB = scoreSide(bGroup,'B');
+
+  let finalPick = scoreP >= scoreB ? 'P' : 'B';
+
+  document.getElementById("deepAssistResult").innerHTML =
+    finalPick==='P'
+      ? `<span style="color:#33b5ff;text-shadow:0 0 12px #33b5ff">แทง PLAYER</span>`
+      : `<span style="color:#ff3b3b;text-shadow:0 0 12px #ff0000">แทง BANKER</span>`;
+
+  document.getElementById("deepAssistScore").innerText =
+    `Score P=${scoreP.toFixed(2)} | Score B=${scoreB.toFixed(2)}`;
+
+}else{
+  deepBox.style.display="none";   // 👈 ซ่อนถ้าไม่คละ
+}
+drawRoad();   // 👈 ต้องอยู่ตรงนี้
+
+} // 👈 ปิด render()
+
+function drawRoad(){
+ const c=document.getElementById('road');
+ const g=c.getContext('2d');
+ g.clearRect(0,0,c.width,c.height);
+ let x=0,y=0,last=null;
+ history.forEach(v=>{
+  if(v===last)y++;else{x++;y=0}
+  if(y>=ROWS){y=0;x++}
+  g.strokeStyle=v==='P'?'#33b5ff':'#ff0000';
+  g.beginPath();
+  g.arc(x*12+6,y*12+6,5,0,Math.PI*2);
+  g.stroke();
+  last=v;
+ });
+}
+render();
+</script>
+
+</body>
+</html>
