@@ -296,13 +296,13 @@ color:var(--muted);padding:6px
 
 <div class="footer">
   Version 1 |
-  หมดอายุ: 15 มีนาคม พ.ศ. 2569
+  หมดอายุ: 25 มีนาคม พ.ศ. 2569
 </div>
 
 
 <script>
 
-const EXPIRE_DATE = new Date('2026-03-15T23:59:59');
+const EXPIRE_DATE = new Date('2026-03-25T23:59:59');
 
 (function checkExpire(){
   const now = new Date();
@@ -320,7 +320,7 @@ const EXPIRE_DATE = new Date('2026-03-15T23:59:59');
         text-align:center;
       ">
         โปรแกรมหมดอายุแล้ว<br>
-        หมดอายุวันที่ 15 มีนาคม พ.ศ. 2569
+        หมดอายุวันที่ 25 มีนาคม พ.ศ. 2569
       </div>
     `;
     throw new Error("EXPIRED");
@@ -605,3 +605,4 @@ render();
 
 </body>
 </html>
+
